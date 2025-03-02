@@ -1,5 +1,8 @@
 package com.sxpi.config;
 
+import com.sxpi.security.MobileAuthenticationProvider;
+import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -7,6 +10,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.firewall.HttpFirewall;
@@ -22,12 +26,22 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 //@EnableGlobalMethodSecurity(prePostEnabled = true)
 public class MobileAuthenticationSecurityConfig implements WebMvcConfigurer {
 
+    @Resource
+    private UserDetailsService userDetailsService;
+
     @Bean
     public HttpFirewall allowUrlEncodedSlashHttpFirewall() {
         StrictHttpFirewall firewall = new StrictHttpFirewall();
         //此处可添加别的规则,目前只设置 允许双 //
         firewall.setAllowUrlEncodedDoubleSlash(true);
         return firewall;
+    }
+
+    @Bean
+    public MobileAuthenticationProvider mobileAuthenticationProvider() {
+        MobileAuthenticationProvider provider = new MobileAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        return provider;
     }
 
     @Bean

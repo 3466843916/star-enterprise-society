@@ -9,19 +9,19 @@ import com.sxpi.common.result.ResultCodeEnum;
 import com.sxpi.convert.ZUserConvert;
 import com.sxpi.costant.RequestHeaderCostant;
 import com.sxpi.mapper.ZUserMapper;
+import com.sxpi.model.dto.Login;
 import com.sxpi.model.dto.ZUserDTO;
 import com.sxpi.model.entity.ZUser;
 import com.sxpi.model.entity.ZUserRole;
 import com.sxpi.model.enums.IsDeletedEnum;
+import com.sxpi.model.enums.RoleEnum;
 import com.sxpi.model.page.PageInfo;
 import com.sxpi.model.page.PageResult;
 import com.sxpi.model.vo.ZUserVO;
 import com.sxpi.model.vo.ZMenuVO;
 import com.sxpi.model.vo.ZRoleVO;
-import com.sxpi.service.ZUserService;
-import com.sxpi.service.ZMenuService;
-import com.sxpi.service.ZRoleService;
-import com.sxpi.service.ZUserRoleService;
+import com.sxpi.security.MobileAuthenticationToken;
+import com.sxpi.service.*;
 import com.sxpi.utils.JwtUtil;
 import com.sxpi.utils.PageUtil;
 import com.sxpi.utils.RedisCache;
@@ -37,7 +37,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
+import java.util.Random;
 
 /**
  * @author happy
@@ -69,73 +74,55 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserMapper, ZUser> implements
     @Resource
     private ZUserRoleService zUserRoleService;
 
+    @Resource
+    private ZLoginService zLoginService;
+
     @Override
-    public ZUserVO login(ZUserDTO userDTO) {
-        // 先尝试通过用户名和密码认证
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(userDTO.getUsername(), userDTO.getPassword());
-        Authentication authenticate = authenticationManager.authenticate(authenticationToken);
+    public ZUserVO loginOrRegister(Login login) {
 
-        ZUser user = (ZUser) authenticate.getPrincipal();
+        String phone = zLoginService.getPhone(login);       // 真实手机号
+//        String phone = login.getPhone();                  // 模拟手机号
 
-        // 创建JWT token
+        // 1. 检查用户是否存在
+        ZUser user = userMapper.selectOne(new LambdaQueryWrapper<ZUser>().eq(ZUser::getPhone, phone));
+
+        if (user == null) {
+            // === 注册逻辑 ===
+            user = new ZUser();
+            user.setUsername(initUsername()); // 生成唯一用户名
+            user.setPhone(phone);
+
+            userMapper.insert(user); // 插入后 user.getId() 自动填充
+
+            // 赋予默认角色
+            ZUserRole userRole = new ZUserRole();
+            userRole.setUserId(user.getId());
+            userRole.setRoleId(Long.valueOf(RoleEnum.USER.getCode())); // 避免硬编码
+            zUserRoleService.addRole(userRole);
+        } else {
+            // === 登录逻辑 ===
+            Authentication authentication = authenticationManager.authenticate(new MobileAuthenticationToken(phone));
+            user = (ZUser) authentication.getPrincipal();
+        }
+
+        // 2. 生成 JWT 令牌
         String token = JwtUtil.createJWT(user.getId().toString());
 
+        // 3. 构造 VO 返回
         ZUserVO userVO = ZUserConvert.INSTANCE.convertEntityToVo(user);
         userVO.setToken(token);
 
-        // 查找该用户的角色和权限信息
-        ZRoleVO zRoleVO = zRoleService.selectRole(userVO.getId());
-        List<ZMenuVO> infoByUserId = zMenuService.getInfoByUserId(userVO.getId());
+        // 4. 绑定用户角色与权限
+        userVO.setRole(zRoleService.selectRole(userVO.getId()));
+        userVO.setPerms(zMenuService.getInfoByUserId(userVO.getId()));
 
-        userVO.setRole(zRoleVO);
-        userVO.setPerms(infoByUserId);
-
-        redisCache.setCacheObject(userVO.getId().toString(), user);
+        // 5. 存入 Redis 缓存
+        redisCache.setCacheObject(userVO.getId().toString(), userVO);
 
         return userVO;
     }
 
-    @Override
-    public ZUserVO register(ZUserDTO userDTO) {
-        // 判断用户名是否已存在
-        ZUser existingUser = userMapper.selectOne(new LambdaQueryWrapper<ZUser>()
-                .eq(ZUser::getUsername, userDTO.getUsername()));
-        if (existingUser != null) {
-            // 如果用户已存在，抛出异常或返回错误信息
-            throw new RuntimeException("用户名已存在");
-        }
 
-        ZUser user = new ZUser();
-        user.setUsername(userDTO.getUsername());            // 设置用户名
-        String encodePwd = passwordEncoder.encode(userDTO.getPassword());
-        user.setPassword(encodePwd);                        // 设置密码
-
-        userMapper.insert(user);
-
-        // 注册时给用户默认设置角色为： USER
-        ZUserRole zUserRole = new ZUserRole();
-        ZUser user1 = userMapper.selectOne(new LambdaQueryWrapper<ZUser>().eq(ZUser::getUsername, user.getUsername())
-                .eq(ZUser::getPassword, user.getPassword()));
-        zUserRole.setUserId(user1.getId());
-        zUserRole.setRoleId(2L);        // 默认为普通用户
-        zUserRoleService.addRole(zUserRole);
-
-        String jwt = JwtUtil.createJWT(user1.getId().toString());
-
-        ZUserVO userVO = ZUserConvert.INSTANCE.convertEntityToVo(user1);
-        userVO.setToken(jwt);
-
-        // 查找该用户的角色和权限信息
-        ZRoleVO zRoleVO = zRoleService.selectRole(userVO.getId());
-        List<ZMenuVO> infoByUserId = zMenuService.getInfoByUserId(userVO.getId());
-
-        userVO.setRole(zRoleVO);
-        userVO.setPerms(infoByUserId);
-
-        redisCache.setCacheObject(userVO.getId().toString(), user);
-        return userVO;
-    }
 
     @Override
     public ResultCodeEnum logout(HttpServletRequest request) {
@@ -289,7 +276,7 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserMapper, ZUser> implements
     /**
      * 删除用户信息
      *
-     * @param id 用户主键
+//     * @param id 用户主键
      * @return 结果
      */
 //    @Override
@@ -297,6 +284,28 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserMapper, ZUser> implements
 //    {
 //        return userMapper.deleteUserById(id);
 //    }
+
+
+    private String initUsername() {
+        String username;
+        Random random = new Random();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HHmmssSSS"); // 小时+分+秒+毫秒（9位）
+
+        do {
+            // 获取当前时间并格式化
+            String timestamp = LocalDateTime.now().format(formatter); // 9 位时间信息
+            int randomNum = random.nextInt(10); // 生成 1 位随机数，确保总共 10 位
+            username = timestamp + randomNum;
+        } while (isUsernameExists(username)); // 如果用户名已存在，则重新生成
+
+        return username;
+    }
+
+    private boolean isUsernameExists(String username) {
+        ZUser existingUser = userMapper.selectOne(new LambdaQueryWrapper<ZUser>()
+                .eq(ZUser::getUsername, username));
+        return existingUser != null;
+    }
 
 
 }

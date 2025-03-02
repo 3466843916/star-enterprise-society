@@ -9,8 +9,9 @@ import lombok.Getter;
 @Getter
 public enum RoleEnum {
     // code对应数据库role表中id字段
-    ADMIN(1,"admin"),
-    USER(2,"user");
+    ADMIN(1,"admin"),       // 付费会员
+    USER(2,"user");        // 普通会员
+
 
     private final Integer code;
 

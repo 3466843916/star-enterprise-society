@@ -2,6 +2,7 @@ package com.sxpi.service;
 
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.sxpi.common.result.ResultCodeEnum;
+import com.sxpi.model.dto.Login;
 import com.sxpi.model.dto.ZUserDTO;
 import com.sxpi.model.entity.ZUser;
 import com.sxpi.model.page.PageResult;
@@ -14,9 +15,8 @@ import jakarta.servlet.http.HttpServletRequest;
  */
 public interface ZUserService extends IService<ZUser> {
 
-    ZUserVO login(ZUserDTO userDTO);
 
-    ZUserVO register(ZUserDTO userDTO);
+    ZUserVO loginOrRegister(Login login);
 
     ResultCodeEnum logout(HttpServletRequest request);
 

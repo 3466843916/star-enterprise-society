@@ -36,9 +36,9 @@ public class MyUserDetailsService implements UserDetailsService {
 
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String phone) throws UsernameNotFoundException {
         // 查询用户
-        ZUser user = userMapper.selectOne(new LambdaQueryWrapper<ZUser>().eq(ZUser::getUsername, username));
+        ZUser user = userMapper.selectOne(new LambdaQueryWrapper<ZUser>().eq(ZUser::getPhone, phone));
 
         if (Objects.isNull(user)) {
             // 用户未找到，抛出异常

@@ -3,7 +3,7 @@ package com.sxpi.controller;
 import com.sxpi.common.result.Result;
 import com.sxpi.common.result.ResultCodeEnum;
 import com.sxpi.costant.FileDirConstant;
-import com.sxpi.model.dto.ZUserDTO;
+import com.sxpi.model.dto.Login;
 import com.sxpi.model.entity.ZUser;
 import com.sxpi.model.page.PageResult;
 import com.sxpi.model.vo.ZUserVO;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.UUID;
-
 
 /**
  * @author happy
@@ -81,15 +80,9 @@ public class ZUserController {
 //        return Result.ok(userService.deleteUserByIds(ids));
 //    }
 
-    @PostMapping("/login")
-    public Result<ZUserVO> login(@RequestBody ZUserDTO userDTO) {
-        ZUserVO userVO = userService.login(userDTO);
-        return Result.ok(userVO);
-    }
-
-    @PostMapping("/register")
-    public Result<ZUserVO> register(@RequestBody ZUserDTO userDTO) {
-        ZUserVO userVO = userService.register(userDTO);
+    @PostMapping("/loginOregister")
+    public Result<ZUserVO> loginOregister(@RequestBody Login login) {
+        ZUserVO userVO = userService.loginOrRegister(login);
         return Result.ok(userVO);
     }
 
