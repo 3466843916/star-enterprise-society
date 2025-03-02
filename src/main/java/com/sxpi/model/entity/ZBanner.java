@@ -1,6 +1,7 @@
 package com.sxpi.model.entity;
 
 import com.baomidou.mybatisplus.annotation.TableLogic;
+import com.sxpi.common.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ZBanner {
+public class ZBanner{
     /**
      * 主键id
      */

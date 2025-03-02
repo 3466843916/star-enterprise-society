@@ -146,7 +146,5 @@ public class ZUserController {
         }
         // 注销失败
         return Result.fail("注销失败");
-
     }
-
 }
