@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.sxpi.mapper.ZUserMapper">
+    <resultMap type="com.sxpi.model.entity.ZUser" id="UserResult">
+        <result property="id"    column="id"    />
+        <result property="username"    column="username"    />
+        <result property="password"    column="password"    />
+        <result property="phone"    column="phone"    />
+        <result property="gender"    column="gender"    />
+        <result property="avatar"    column="avatar"    />
+        <result property="createdBy"    column="created_by"    />
+        <result property="createdTime"    column="created_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="isDeleted"    column="is_deleted"    />
+    </resultMap>
+
+    <sql id="selectUserVo">
+        select id, username, password, phone, gender, avatar, created_by, created_time, update_by, update_time, is_deleted from z_user
+    </sql>
+
+<!--    <select id="selectUserList" parameterType="com.sxpi.model.entity.ZUser" resultMap="UserResult">-->
+<!--        <include refid="selectUserVo"/>-->
+<!--        <where>-->
+<!--            <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>-->
+<!--            <if test="password != null  and password != ''"> and password = #{password}</if>-->
+<!--            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>-->
+<!--            <if test="gender != null "> and gender = #{gender}</if>-->
+<!--            <if test="avatar != null  and avatar != ''"> and avatar = #{avatar}</if>-->
+<!--            <if test="createdBy != null  and createdBy != ''"> and created_by = #{createdBy}</if>-->
+<!--            <if test="createdTime != null "> and created_time = #{createdTime}</if>-->
+<!--&lt;!&ndash;            <if test="isDeleted != null "> and is_deleted = #{isDeleted}</if>&ndash;&gt;-->
+<!--            and is_deleted = 0-->
+<!--        </where>-->
+<!--        LIMIT #{pageNo}, #{pageSize}-->
+<!--    </select>-->
+
+<!--    <select id="selectUserCount" parameterType="com.sxpi.model.entity.ZUser" resultType="int">-->
+<!--        select count(*) from z_user-->
+<!--            <where>-->
+<!--                <if test="username != null  and username != ''"> and username like concat('%', #{username}, '%')</if>-->
+<!--                <if test="password != null  and password != ''"> and password = #{password}</if>-->
+<!--                <if test="phone != null  and phone != ''"> and phone = #{phone}</if>-->
+<!--                <if test="gender != null "> and gender = #{gender}</if>-->
+<!--                <if test="avatar != null  and avatar != ''"> and avatar = #{avatar}</if>-->
+<!--                <if test="createdBy != null  and createdBy != ''"> and created_by = #{createdBy}</if>-->
+<!--                <if test="createdTime != null "> and created_time = #{createdTime}</if>-->
+<!--                <if test="isDeleted != null "> and is_deleted = #{isDeleted}</if>-->
+<!--                and is_deleted = 0-->
+<!--            </where>-->
+<!--    </select>-->
+
+    <select id="selectUserById" parameterType="Long" resultMap="UserResult">
+        <include refid="selectUserVo"/>
+        where z_user.id = #{id} and z_user.is_deleted = 0
+    </select>
+
+<!--    <insert id="insertUser" parameterType="User" useGeneratedKeys="true" keyProperty="id">-->
+<!--        insert into user-->
+<!--        <trim prefix="(" suffix=")" suffixOverrides=",">-->
+<!--            <if test="username != null">username,</if>-->
+<!--            <if test="password != null">password,</if>-->
+<!--            <if test="phone != null">phone,</if>-->
+<!--            <if test="gender != null">gender,</if>-->
+<!--            <if test="avatar != null">avatar,</if>-->
+<!--            <if test="createdBy != null">created_by,</if>-->
+<!--            <if test="createdTime != null">created_time,</if>-->
+<!--            <if test="updateBy != null">update_by,</if>-->
+<!--            <if test="updateTime != null">update_time,</if>-->
+<!--            <if test="isDeleted != null">is_deleted,</if>-->
+<!--        </trim>-->
+<!--        <trim prefix="values (" suffix=")" suffixOverrides=",">-->
+<!--            <if test="username != null">#{username},</if>-->
+<!--            <if test="password != null">#{password},</if>-->
+<!--            <if test="phone != null">#{phone},</if>-->
+<!--            <if test="gender != null">#{gender},</if>-->
+<!--            <if test="avatar != null">#{avatar},</if>-->
+<!--            <if test="createdBy != null">#{createdBy},</if>-->
+<!--            <if test="createdTime != null">#{createdTime},</if>-->
+<!--            <if test="updateBy != null">#{updateBy},</if>-->
+<!--            <if test="updateTime != null">#{updateTime},</if>-->
+<!--            <if test="isDeleted != null">#{isDeleted},</if>-->
+<!--        </trim>-->
+<!--    </insert>-->
+
+    <update id="updateUser" parameterType="com.sxpi.model.entity.ZUser">
+        update z_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="username != null">username = #{username},</if>
+            <if test="password != null">password = #{password},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="gender != null">gender = #{gender},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="createdBy != null">created_by = #{createdBy},</if>
+            <if test="createdTime != null">created_time = #{createdTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="isDeleted != null">is_deleted = #{isDeleted},</if>
+        </trim>
+        where z_user.id = #{id} and z_user.is_deleted = 0
+    </update>
+
+<!--    <delete id="deleteUserById" parameterType="Long">-->
+<!--        delete from user where id = #{id}-->
+<!--    </delete>-->
+
+<!--    <delete id="deleteUserByIds" parameterType="String">-->
+<!--        delete from user where id in-->
+<!--        <foreach item="id" collection="array" open="(" separator="," close=")">-->
+<!--            #{id}-->
+<!--        </foreach>-->
+<!--    </delete>-->
+</mapper>
