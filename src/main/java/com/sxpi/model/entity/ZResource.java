@@ -21,10 +21,6 @@ public class ZResource  extends BaseEntity {
     private String region;
     private String images;
     private Integer status;
-    private Long createdBy;
-    private LocalDateTime createdTime;
-    private Long updateBy;
-    private LocalDateTime updateTime;
-    @TableLogic
-    private Integer isDeleted;
+    private Integer flag;
+
 } 

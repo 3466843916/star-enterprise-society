@@ -1,8 +1,12 @@
 package com.sxpi.model.dto;
 
 import com.sxpi.common.BaseEntity;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
+@AllArgsConstructor
+@NoArgsConstructor
 @Data
 public class ZCardDTO extends BaseEntity {
     private Long id;

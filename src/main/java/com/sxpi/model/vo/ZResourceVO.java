@@ -15,4 +15,6 @@ public class ZResourceVO {
     private String images;
     private Integer status;
     private LocalDateTime createdTime;
+    private Integer flag;
+
 } 

@@ -36,6 +36,7 @@ public class ZCardFavoritesController {
     
     @PostMapping
     public Result<Boolean> save(@RequestBody ZCardFavoritesDTO favoritesDTO) {
+
         return Result.ok(favoritesService.save(favoritesDTO));
     }
     

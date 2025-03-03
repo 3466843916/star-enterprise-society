@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sxpi.common.result.Result;
 import com.sxpi.model.dto.ZServiceDTO;
 import com.sxpi.model.entity.ZService;
+import com.sxpi.model.page.PageResult;
 import com.sxpi.model.vo.ZServiceVO;
 import com.sxpi.service.ZServiceService;
 import jakarta.annotation.Resource;
@@ -51,5 +52,17 @@ public class ZServiceController {
             ZServiceDTO serviceDTO) {
         Page<ZService> page = new Page<>(current, size);
         return Result.ok(serviceService.page(page, serviceDTO));
+    }
+    @GetMapping("/list")
+    public Result<PageResult<ZServiceVO>> list(ZServiceDTO zServiceDTO){
+
+        return Result.ok(serviceService.list(zServiceDTO));
+    }
+    @DeleteMapping("delete")
+    public Result<Boolean> removeById(@RequestBody List<Long> ids) {
+        ids.forEach(id -> {
+            serviceService.removeById(id);
+        });
+        return Result.ok(true);
     }
 } 

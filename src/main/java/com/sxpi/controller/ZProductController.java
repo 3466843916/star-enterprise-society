@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sxpi.common.result.Result;
 import com.sxpi.model.dto.ZProductDTO;
 import com.sxpi.model.entity.ZProduct;
+import com.sxpi.model.page.PageResult;
 import com.sxpi.model.vo.ZProductVO;
 import com.sxpi.service.ZProductService;
 import jakarta.annotation.Resource;
@@ -19,6 +20,16 @@ import java.util.List;
 public class ZProductController {
     @Resource
     private ZProductService productService;
+
+    /**
+     * 分页
+     * @param zProductDTO
+     * @return
+     */
+    @GetMapping("/list")
+    private Result<PageResult<ZProductVO>> list(ZProductDTO zProductDTO) {
+        return Result.ok(productService.list(zProductDTO));
+    }
     
     @GetMapping("/{id}")
     public Result<ZProductVO> getById(@PathVariable Long id) {
@@ -45,17 +56,20 @@ public class ZProductController {
         return Result.ok(productService.update(productDTO));
     }
     
-    @DeleteMapping("/{id}")
-    public Result<Boolean> removeById(@PathVariable Long id) {
-        return Result.ok(productService.removeById(id));
+    @DeleteMapping
+    public Result<Boolean> removeById(@RequestBody List<Long> ids) {
+        ids.forEach(id -> {
+            productService.removeById(id);
+        });
+        return Result.ok(true);
     }
 
-    @GetMapping("/page")
-    public Result<Page<ZProductVO>> page(
-            @RequestParam(defaultValue = "1") Integer current,
-            @RequestParam(defaultValue = "10") Integer size,
-            ZProductDTO productDTO) {
-        Page<ZProduct> page = new Page<>(current, size);
-        return Result.ok(productService.page(page, productDTO));
-    }
+//    @GetMapping("/page")
+//    public Result<Page<ZProductVO>> page(
+//            @RequestParam(defaultValue = "1") Integer current,
+//            @RequestParam(defaultValue = "10") Integer size,
+//            ZProductDTO productDTO) {
+//        Page<ZProduct> page = new Page<>(current, size);
+//        return Result.ok(productService.page(page, productDTO));
+//    }
 } 

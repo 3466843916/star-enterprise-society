@@ -14,14 +14,11 @@ import java.time.LocalDateTime;
 public class ZProduct  extends BaseEntity {
     @TableId(type = IdType.AUTO)
     private Long id;
+    private Long userId;
     private String name;
     private String description;
     private String images;
     private Integer status;
-    private Long createdBy;
-    private LocalDateTime createdTime;
-    private Long updateBy;
-    private LocalDateTime updateTime;
-    @TableLogic
-    private Integer isDeleted;
+    private Integer flag;
+
 } 

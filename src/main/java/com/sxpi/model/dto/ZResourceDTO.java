@@ -13,4 +13,6 @@ public class ZResourceDTO  extends BaseEntity {
     private String region;
     private String images;
     private Integer status;
+    private Integer flag;
+
 } 

@@ -1,11 +1,14 @@
 package com.sxpi.service.impl;
 
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.sxpi.mapper.ZServiceMapper;
 import com.sxpi.model.dto.ZServiceDTO;
 import com.sxpi.model.entity.ZService;
+import com.sxpi.model.page.PageResult;
 import com.sxpi.model.vo.ZServiceVO;
 import com.sxpi.service.ZServiceService;
 import com.sxpi.convert.ZServiceConvert;
+import com.sxpi.utils.PageUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.List;
@@ -55,5 +58,16 @@ public class ZServiceServiceImpl implements ZServiceService {
         Page<ZServiceVO> voPage = new Page<>(page.getCurrent(), page.getSize(), page.getTotal());
         voPage.setRecords(ZServiceConvert.INSTANCE.convertEntityToVo(servicePage.getRecords()));
         return voPage;
+    }
+
+    @Override
+    public PageResult<ZServiceVO> list(ZServiceDTO zServiceDTO) {
+        Page<ZService> page = new Page<>(zServiceDTO.getPageNo(),zServiceDTO.getPageSize());
+        LambdaQueryWrapper<ZService> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(zServiceDTO.getName()!=null,ZService::getName,zServiceDTO.getName());
+        IPage<ZService> zServicePage = serviceMapper.selectPage(page, queryWrapper);
+        List<ZServiceVO> zServiceVOS = ZServiceConvert.INSTANCE.convertEntityToVo(zServicePage.getRecords());
+
+        return PageUtil.createPageResult(page, zServiceVOS, zServicePage.getTotal());
     }
 } 
