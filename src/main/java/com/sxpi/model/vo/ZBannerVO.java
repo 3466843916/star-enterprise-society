@@ -15,6 +15,16 @@ public class ZBannerVO {
     // 主键id
     private Long id;
 
+    // 轮播图标题
+    private String title;
+
     // 图片路径
     private String img;
+
+    /**
+     * 是否主图（0否，1是，默认0）
+     */
+    private Integer isPrimary;
+
+    private Integer sort;
 }

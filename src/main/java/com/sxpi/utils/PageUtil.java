@@ -1,5 +1,6 @@
 package com.sxpi.utils;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.sxpi.model.page.PageInfo;
 import com.sxpi.model.page.PageResult;
 
@@ -23,6 +24,15 @@ public class PageUtil {
         PageResult<T> pageResult = new PageResult<>();
         pageResult.setPageNo(pageInfo.getPageNo());
         pageResult.setPageSize(pageInfo.getPageSize());
+        pageResult.setResult(resultList);
+        pageResult.setTotal((int) total);
+        return pageResult;
+    }
+
+    public static <T> PageResult<T> createPageResult(Page page, List<T> resultList, long total) {
+        PageResult<T> pageResult = new PageResult<>();
+        pageResult.setPageNo((int) page.getCurrent());
+        pageResult.setPageSize((int) page.getSize());
         pageResult.setResult(resultList);
         pageResult.setTotal((int) total);
         return pageResult;

@@ -80,8 +80,8 @@ public class ZUserController {
 //        return Result.ok(userService.deleteUserByIds(ids));
 //    }
 
-    @PostMapping("/loginOregister")
-    public Result<ZUserVO> loginOregister(@RequestBody Login login) {
+    @PostMapping("/login")
+    public Result<ZUserVO> loginOrRegister(@RequestBody Login login) {
         ZUserVO userVO = userService.loginOrRegister(login);
         return Result.ok(userVO);
     }

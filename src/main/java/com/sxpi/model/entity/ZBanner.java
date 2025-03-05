@@ -15,11 +15,14 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ZBanner{
+public class ZBanner extends BaseEntity{
     /**
      * 主键id
      */
     private Long id;
+
+    // 轮播图标题
+    private String title;
 
     /**
      * 图片路径
@@ -27,28 +30,13 @@ public class ZBanner{
     private String img;
 
     /**
-     * 创建人
+     * 是否主图（0否，1是，默认0）
      */
-    private String createdBy;
+    private Integer isPrimary;
 
     /**
-     * 创建时间
+     * 排序
      */
-    private LocalDateTime createdTime;
+    private Integer sort;
 
-    /**
-     * 更新人
-     */
-    private String updateBy;
-
-    /**
-     * 更新时间
-     */
-    private LocalDateTime updateTime;
-
-    /**
-     * 是否删除（1:已删除，0：未删除）
-     */
-    @TableLogic
-    private Integer isDeleted;
 }

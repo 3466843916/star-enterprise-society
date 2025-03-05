@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,6 +20,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -106,6 +109,7 @@ public class ZImageServiceImpl implements ZImageService {
         return fileUUID;
     }
 
+    @Async
     @Override
     public Boolean deleteImageFile(String path, String fileName) {
         Boolean isSuccess = false;
@@ -123,5 +127,16 @@ public class ZImageServiceImpl implements ZImageService {
             }
         }
         return isSuccess;
+    }
+
+    @Override
+    public List<String> batchDeleteFiles(String dir, List<String> fileNames) {
+        List<String> failedFiles = new ArrayList<>();
+        fileNames.forEach(name -> {
+            if (!deleteImageFile(dir, name)) {
+                failedFiles.add(name);
+            }
+        });
+        return failedFiles;
     }
 }

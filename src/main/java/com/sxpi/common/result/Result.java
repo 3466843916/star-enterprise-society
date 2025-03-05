@@ -2,6 +2,7 @@ package com.sxpi.common.result;
 
 import lombok.Data;
 
+import javax.swing.*;
 import java.util.HashMap;
 
 
@@ -43,5 +44,9 @@ public class Result<T> {
 
     public static <T> Result<T> fail(T data) {
         return build(data, ResultCodeEnum.FAIL);
+    }
+
+    public static <T> Result<String> fail() {
+        return fail("操作失败");
     }
 }
