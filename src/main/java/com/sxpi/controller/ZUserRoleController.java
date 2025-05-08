@@ -26,15 +26,14 @@ public class ZUserRoleController {
 
     /**
      * 修改用户角色
-     * @param roleId 要修改的用户的角色ID
      */
     @PutMapping
-    public Result<String> edit(Integer roleId) {
-        ZUser user = SecurityUtils.getLoginUser();
+    public Result<String> edit(ZUserRole zUserRole) {
+//        ZUser user = SecurityUtils.getLoginUser();
 
         ZUserRole userRole = new ZUserRole();
-        userRole.setUserId(user.getId());
-        userRole.setRoleId(Long.valueOf(roleId));
+        userRole.setUserId(zUserRole.getUserId());
+        userRole.setRoleId(Long.valueOf(zUserRole.getRoleId()));
 
         if (userRoleService.updateById(userRole)) {
             return Result.ok("修改成功");

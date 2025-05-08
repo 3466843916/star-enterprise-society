@@ -21,4 +21,5 @@ public interface ZUserConvert {
 
     ZUser convertDtoToEntity(ZUserDTO userDTO);
     ZUserVO convertDtoToVo(ZUserDTO userDTO);
+    ZUser convertVoToEntity(ZUserVO userVO);
 }

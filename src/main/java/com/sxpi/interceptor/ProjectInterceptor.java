@@ -1,6 +1,8 @@
 package com.sxpi.interceptor;
 
+import com.sxpi.convert.ZUserConvert;
 import com.sxpi.model.entity.ZUser;
+import com.sxpi.model.vo.ZUserVO;
 import com.sxpi.utils.JwtUtil;
 import com.sxpi.utils.RedisCache;
 import io.jsonwebtoken.Claims;
@@ -50,7 +52,8 @@ public class ProjectInterceptor implements HandlerInterceptor {
         // 从redis中获取用户信息
 //        String redisKey = PrivacyConstant.FRONT + id;
         String redisKey = id;
-        ZUser user = redisCache.getCacheObject(redisKey);
+        ZUserVO userVO = redisCache.getCacheObject(redisKey);
+        ZUser user = ZUserConvert.INSTANCE.convertVoToEntity(userVO);
         if (Objects.isNull(user)) {
 //            throw new RuntimeException("用户未登录");
 //            return false;

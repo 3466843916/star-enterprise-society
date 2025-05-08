@@ -2,6 +2,7 @@ package com.sxpi.controller;
 
 import com.sxpi.common.result.Result;
 import com.sxpi.model.dto.ZBannerDTO;
+import com.sxpi.model.entity.ZBanner;
 import com.sxpi.model.page.PageResult;
 import com.sxpi.model.vo.ZBannerVO;
 import com.sxpi.service.ZBannerService;
@@ -29,6 +30,14 @@ public class ZBannerController {
         PageResult<ZBannerVO> zBannerVOPageResult = zBannerService.getList(zBannerDTO);
         return Result.ok(zBannerVOPageResult);
     }
+@PutMapping("/update")
+public Result<String> update(@RequestBody ZBanner zBanner){
+    boolean b = zBannerService.updateById(zBanner);
+    if (b){
+        return Result.ok("操作成功");
+    }
+   return Result.fail("操作失败");
+}
 
     /**
      * 修改
@@ -41,6 +50,7 @@ public class ZBannerController {
         }
         return Result.fail();
     }
+
 
     /**
      * 添加

@@ -1,6 +1,5 @@
 package com.sxpi.common;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.sxpi.model.page.PageInfo;

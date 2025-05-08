@@ -19,6 +19,7 @@ public interface ZUserRoleConvert {
     ZUserRoleConvert INSTANCE = Mappers.getMapper(ZUserRoleConvert.class);
 
     List<ZUserRoleVO> convertEntityToVo(List<ZUserRole> userRoles);
+    ZUserRoleVO convertEntityToVo(ZUserRole userRole);
 //    ZUserVO convertEntityToVo(ZUser user);
 //
 //    ZUser convertDtoToEntity(ZUserDTO userDTO);

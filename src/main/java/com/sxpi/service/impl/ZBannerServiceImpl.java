@@ -53,12 +53,14 @@ public class ZBannerServiceImpl extends ServiceImpl<ZBannerMapper, ZBanner> impl
     @Resource
     private ZBannerMapper zBannerMapper;
 
+
     @Override
     public PageResult<ZBannerVO> getList(ZBannerDTO zBannerDTO) {
         Page<ZBanner> page = new Page<>(zBannerDTO.getPageNo(), zBannerDTO.getPageSize());
 
         LambdaQueryWrapper<ZBanner> queryWrapper = new LambdaQueryWrapper<ZBanner>()
                 .eq(ZBanner::getIsDeleted, 0)
+//                .orderByDesc(ZBanner::getCreatedTime)
                 .orderByAsc(ZBanner::getSort);// 按 sort 降序
 
         IPage<ZBanner> zBannerPage = zBannerMapper.selectPage(page, queryWrapper);
@@ -112,7 +114,6 @@ public class ZBannerServiceImpl extends ServiceImpl<ZBannerMapper, ZBanner> impl
                         .set(ZBanner::getSort, newSort)
                         .set(ZBanner::getTitle, zBannerDTO.getTitle())
         );
-
         return true;
     }
 

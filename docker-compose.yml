@@ -1,0 +1,66 @@
+version: "3"
+services:
+  nginx: # 服务名称，用户自定义
+    image: nginx:latest  # 镜像版本
+    container_name: star-nginx
+    ports:
+      - 80:80  # 暴露端口
+    volumes: # 挂载
+      - C:/root/nginx/html:/usr/share/nginx/html
+      - C:/root/nginx/nginx.conf:/etc/nginx/nginx.conf
+    privileged: true # 这个必须要，解决nginx的文件调用的权限问题
+    restart: always
+    networks:
+      - star-network
+
+  mysql:
+    image: mysql:8.0.11
+    container_name: star-mysql
+    ports:
+      - 3307:3307 # 映射到主机的3306端口，避免与本地MySQL端口冲突
+    environment:
+      - MYSQL_ROOT_PASSWORD=admin # 与应用配置一致
+      - MYSQL_DATABASE=star-enterprise-society
+    volumes:
+      - C:/root/mysql/data:/var/lib/mysql # 数据持久化
+      - C:/root/mysql/conf:/etc/mysql/conf.d # 配置持久化
+    restart: always
+    networks:
+      - star-network
+
+  redis:
+    image: redis:latest
+    container_name: star-redis
+    ports:
+      - 6378:6378
+    volumes:
+      - C:/root/redis/data:/data # Redis数据持久化
+    restart: always
+    networks:
+      - star-network
+
+  app:
+    image: star-app:latest
+    container_name: star-app
+    build: . # 表示以当前目录下的Dockerfile开始构建镜像
+    ports:
+      - 9002:9002
+    volumes:
+      - /root/app:/root/app
+      - C:/root/app/banner:/user/banner # 文件存储目录映射
+      - C:/root/app/head:/user/head
+      - C:/root/app/result:/user/result
+      - C:/root/app/card:/user/card
+      - C:/root/app/activity:/user/activity
+      - C:/root/app/resource:/user/resource
+      - C:/root/app/product:/user/product
+    depends_on:
+      - mysql
+      - redis
+    restart: always
+    networks:
+      - star-network
+
+networks:
+  star-network:
+    driver: bridge

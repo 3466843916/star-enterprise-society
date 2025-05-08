@@ -4,11 +4,14 @@ import com.sxpi.common.result.Result;
 import com.sxpi.common.result.ResultCodeEnum;
 import com.sxpi.costant.FileDirConstant;
 import com.sxpi.model.dto.Login;
+import com.sxpi.model.dto.ZUserDTO;
 import com.sxpi.model.entity.ZUser;
 import com.sxpi.model.page.PageResult;
+import com.sxpi.model.vo.ZUserRoleVO;
 import com.sxpi.model.vo.ZUserVO;
 import com.sxpi.service.ZImageService;
 import com.sxpi.service.ZUserService;
+
 import com.sxpi.utils.SecurityUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,7 +49,6 @@ public class ZUserController {
     @GetMapping("/list")
     public Result<PageResult<ZUserVO>> list(ZUser user)
     {
-
         PageResult<ZUserVO> list = userService.selectUserList(user);
         return Result.ok(list);
     }
@@ -85,6 +87,17 @@ public class ZUserController {
         ZUserVO userVO = userService.loginOrRegister(login);
         return Result.ok(userVO);
     }
+    @PostMapping("/loginUser")
+    public Result<ZUserVO> login(@RequestBody ZUserDTO userDTO) {
+        ZUserVO userVO = userService.login(userDTO);
+        return Result.ok(userVO);
+    }
+
+    @PostMapping("/register")
+    public Result<ZUserVO> register(@RequestBody ZUserDTO userDTO) {
+        ZUserVO userVO = userService.register(userDTO);
+        return Result.ok(userVO);
+    }
 
     @PostMapping("/logout")
     public Result<String> logout(HttpServletRequest request) {
@@ -99,10 +112,12 @@ public class ZUserController {
     public Result<String> avatar(@RequestParam("file") MultipartFile file) {
         if (!file.isEmpty()) {
             ZUser loginUser = SecurityUtils.getLoginUser();
+            log.info(loginUser.getUsername());
             String uuid = UUID.randomUUID() + loginUser.getUsername() + loginUser.getId();
             String avatar = imageService.uploadImageFile(FileDirConstant.HEAD, file, uuid);
 
             loginUser.setAvatar(avatar);
+
 
             userService.updateById(loginUser);
             return Result.ok("图片上传成功");
@@ -116,22 +131,26 @@ public class ZUserController {
     @PutMapping("/updatePwd")
     public Result<String> updatePwd(String oldPassword, String newPassword) {
         ZUser loginUser = SecurityUtils.getLoginUser();
-        String password = loginUser.getPassword();
+
+        // 这里从数据库查一次最新的密码
+        ZUser dbUser = userService.getById(loginUser.getId());
+        String password = dbUser.getPassword();
+
         if (!SecurityUtils.matchesPassword(oldPassword, password)) {
             return Result.fail("修改密码失败，旧密码错误");
         }
+
         if (SecurityUtils.matchesPassword(newPassword, password)) {
             return Result.fail("新密码不能与旧密码相同");
         }
-        newPassword = SecurityUtils.encryptPassword(newPassword);
-        loginUser.setPassword(newPassword);
-        boolean isSuccess = userService.updateById(loginUser);
-        if (isSuccess) {
-            // 登录成功
-            return Result.ok();
-        }
-        return Result.fail("修改密码异常，请联系管理员");
+
+        String encryptedNewPassword = SecurityUtils.encryptPassword(newPassword);
+        dbUser.setPassword(encryptedNewPassword);
+
+        boolean isSuccess = userService.updateById(dbUser);
+        return isSuccess ? Result.ok() : Result.fail("修改密码异常，请联系管理员");
     }
+
 
     /**
      * 注销用户
@@ -146,5 +165,11 @@ public class ZUserController {
         }
         // 注销失败
         return Result.fail("注销失败");
+    }
+
+    @GetMapping("/time/{userId}")
+    public Result<ZUserRoleVO> getStartAndDeadline(@PathVariable Integer userId) {
+        ZUserRoleVO zUserRoleVO = userService.getStartAndDeadline(userId);
+        return Result.ok(zUserRoleVO);
     }
 }

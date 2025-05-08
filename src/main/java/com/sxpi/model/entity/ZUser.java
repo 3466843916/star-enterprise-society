@@ -7,8 +7,12 @@ import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.ser.Serializers;
 import com.sxpi.common.BaseEntity;
+import com.sxpi.common.Desensitize.Desensitize;
+import com.sxpi.config.DesensitizeSerializer;
+import com.sxpi.model.enums.DesensitizationType;
 import com.sxpi.model.page.PageInfo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -39,9 +43,12 @@ public class ZUser extends BaseEntity implements UserDetails, Serializable {
     private static final long serialVersionUID = -1212367372911855308L;
 
     @TableId
-    private Long id;            // 用户id
+    private Long id;// 用户id
+
     private String username;
     private String password;
+    @Desensitize(type = DesensitizationType.PHONE)
+    @JsonSerialize(using = DesensitizeSerializer.class)
     private String phone;
     private Integer gender;
     private String avatar;

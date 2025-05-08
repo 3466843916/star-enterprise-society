@@ -6,6 +6,7 @@ import com.sxpi.model.dto.Login;
 import com.sxpi.model.dto.ZUserDTO;
 import com.sxpi.model.entity.ZUser;
 import com.sxpi.model.page.PageResult;
+import com.sxpi.model.vo.ZUserRoleVO;
 import com.sxpi.model.vo.ZUserVO;
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -53,6 +54,12 @@ public interface ZUserService extends IService<ZUser> {
     public int updateUser(ZUser user);
 
     Boolean cancel(Integer id);
+
+    ZUserVO register(ZUserDTO zUserDTO);
+
+    ZUserVO login(ZUserDTO zUserDTO);
+
+    ZUserRoleVO getStartAndDeadline(Integer userId);
 
     /**
      * 批量删除用户

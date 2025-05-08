@@ -1,7 +1,7 @@
 package com.sxpi.convert;
 
+
 import com.sxpi.model.dto.ZBannerDTO;
-import com.sxpi.model.dto.ZUserDTO;
 import com.sxpi.model.entity.ZBanner;
 import com.sxpi.model.entity.ZUser;
 import com.sxpi.model.vo.ZBannerVO;

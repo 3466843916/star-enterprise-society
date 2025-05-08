@@ -23,6 +23,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @author happy
@@ -42,6 +43,25 @@ public class ZImageServiceImpl implements ZImageService {
     @Value("${file.result-dir}")
     private String resultUrl;
 
+    @Value("${file.card-dir}")
+    private String cardUrl;
+
+    @Value("${file.activity-dir}")
+    private String activityUrl;
+
+    @Value("${file.resource-dir}")
+    private String resourceUrl;
+
+    @Value("${file.product-dir}")
+    private String productUrl;
+
+    @Value("${file.demand-dir}")
+    private String demandUrl;
+    @Value("${file.enterprise-dir}")
+    private String enterpriseUrl;
+    @Value("${file.dishes-dir}")
+    private String dishesUrl;
+
     @Override
     public ResponseEntity<byte[]> showFile(String fileName, String imgUri) {
         try {
@@ -52,6 +72,18 @@ public class ZImageServiceImpl implements ZImageService {
                 filePath = Paths.get(headUrl).resolve(fileName);
             } else if (Objects.equals(imgUri, FileDirConstant.RESULT)) {
                 filePath = Paths.get(resultUrl).resolve(fileName);
+            }else if (Objects.equals(imgUri, FileDirConstant.CARD)) {
+                filePath = Paths.get(cardUrl).resolve(fileName);
+            }else if (Objects.equals(imgUri, FileDirConstant.ACTIVITY)) {
+                filePath = Paths.get(activityUrl).resolve(fileName);
+            }else if (Objects.equals(imgUri, FileDirConstant.RESOURCE)) {
+                filePath = Paths.get(resourceUrl).resolve(fileName);
+            }else if (Objects.equals(imgUri, FileDirConstant.PRODUCT)) {
+                filePath = Paths.get(productUrl).resolve(fileName);
+            } else if (Objects.equals(imgUri,FileDirConstant.ENTERPRISE)){
+                filePath = Paths.get(enterpriseUrl).resolve(fileName);
+            }else if (Objects.equals(imgUri,FileDirConstant.DISHES)){
+                filePath = Paths.get(dishesUrl).resolve(fileName);
             }
 
             if (filePath != null && Files.exists(filePath) && Files.isReadable(filePath)) {
@@ -94,8 +126,31 @@ public class ZImageServiceImpl implements ZImageService {
         }*/ else if (path.equals(FileDirConstant.HEAD)) {
             uploadParentFile = new File(headUrl + uuid);
             uploadFile = new File(headUrl + fileUUID);
+        }else if (path.equals(FileDirConstant.CARD)) {
+            uploadParentFile = new File(cardUrl + uuid);
+            uploadFile = new File(cardUrl + fileUUID);
+        }else if (path.equals(FileDirConstant.ACTIVITY)) {
+            uploadParentFile = new File(activityUrl + uuid);
+            uploadFile = new File(activityUrl + fileUUID);
+        }else if (path.equals(FileDirConstant.RESOURCE)) {
+            uploadParentFile = new File(resourceUrl + uuid);
+            uploadFile = new File(resourceUrl + fileUUID);
+        }else if (path.equals(FileDirConstant.PRODUCT)) {
+            uploadParentFile = new File(productUrl + uuid);
+            uploadFile = new File(productUrl + fileUUID);
         }
-
+        else if (path.equals(FileDirConstant.DEMAND)){
+            uploadParentFile = new File(demandUrl + uuid);
+            uploadFile = new File(demandUrl + fileUUID);
+        }
+        else if (path.equals(FileDirConstant.ENTERPRISE)){
+            uploadParentFile = new File(enterpriseUrl + uuid);
+            uploadFile = new File(enterpriseUrl + fileUUID);
+        }
+        else if (path.equals(FileDirConstant.DISHES)){
+            uploadParentFile = new File(dishesUrl + uuid);
+            uploadFile = new File(dishesUrl + fileUUID);
+        }
         //判断配置的文件目录是否存在，若不存在则创建一个新的文件目录
         if (!uploadParentFile.getParentFile().exists()) {
             uploadParentFile.getParentFile().mkdir();

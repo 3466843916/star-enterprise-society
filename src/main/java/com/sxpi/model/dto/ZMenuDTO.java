@@ -18,6 +18,6 @@ public class ZMenuDTO extends BaseEntity {
     private String menuName;
     private String path;
     private String component;
-    private Character status;
+    private String status;
     private String perms;
 }

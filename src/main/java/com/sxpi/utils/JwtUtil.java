@@ -101,16 +101,16 @@ public class JwtUtil {
 
 
     public static void main(String[] args) throws Exception {
-        Claims claims = parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI1Zjk2YTA1OTIxYWQ0YTc5YmJhOGE5MTk3NDhjMGE5YSIsInN1YiI6IjM1IiwiaXNzIjoic2ciLCJpYXQiOjE3MDcxMjQ1MzYsImV4cCI6MTcwNzIxMDkzNn0.lL1OyxeOEeFOIXzr6v4pJq63hihEc35xzYFeJNHLfxE");
-        String subject = claims.getSubject();
-        System.out.println(subject);
+//        Claims claims = parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI1Zjk2YTA1OTIxYWQ0YTc5YmJhOGE5MTk3NDhjMGE5YSIsInN1YiI6IjM1IiwiaXNzIjoic2ciLCJpYXQiOjE3MDcxMjQ1MzYsImV4cCI6MTcwNzIxMDkzNn0.lL1OyxeOEeFOIXzr6v4pJq63hihEc35xzYFeJNHLfxE");
+//        String subject = claims.getSubject();
+//        System.out.println(subject);
 
-        String jwt = createJWT("35", -1L);
+        String jwt = createJWT(String.valueOf(3));
         System.out.println(jwt);
 
-        Claims claims1 = parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI1YmU0Y2NmM2ZmYzQ0YTkzODE4YTNjYmUyZDQxYTdlZiIsInN1YiI6IjM1IiwiaXNzIjoic2ciLCJpYXQiOjE3MDcxMzI4NDgsImV4cCI6MTcwNzEzMjg0OH0.h0xb3uvOoaWR6e1dKCcobbTDis_d6Z9kopmBGpIdqG4");
-        String subject1 = claims1.getSubject();
-        System.out.println(subject1);
+//        Claims claims1 = parseJWT("eyJhbGciOiJIUzI1NiJ9.eyJqdGkiOiI1YmU0Y2NmM2ZmYzQ0YTkzODE4YTNjYmUyZDQxYTdlZiIsInN1YiI6IjM1IiwiaXNzIjoic2ciLCJpYXQiOjE3MDcxMzI4NDgsImV4cCI6MTcwNzEzMjg0OH0.h0xb3uvOoaWR6e1dKCcobbTDis_d6Z9kopmBGpIdqG4");
+//        String subject1 = claims1.getSubject();
+//        System.out.println(subject1);
     }
 
     /**

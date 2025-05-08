@@ -3,10 +3,12 @@ package com.sxpi.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.sxpi.common.result.ResultCodeEnum;
 import com.sxpi.convert.ZUserConvert;
+import com.sxpi.convert.ZUserRoleConvert;
 import com.sxpi.costant.RequestHeaderCostant;
 import com.sxpi.mapper.ZUserMapper;
 import com.sxpi.model.dto.Login;
@@ -15,8 +17,8 @@ import com.sxpi.model.entity.ZUser;
 import com.sxpi.model.entity.ZUserRole;
 import com.sxpi.model.enums.IsDeletedEnum;
 import com.sxpi.model.enums.RoleEnum;
-import com.sxpi.model.page.PageInfo;
 import com.sxpi.model.page.PageResult;
+import com.sxpi.model.vo.ZUserRoleVO;
 import com.sxpi.model.vo.ZUserVO;
 import com.sxpi.model.vo.ZMenuVO;
 import com.sxpi.model.vo.ZRoleVO;
@@ -37,10 +39,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 import java.util.Random;
 
@@ -91,7 +91,7 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserMapper, ZUser> implements
             user = new ZUser();
             user.setUsername(initUsername()); // 生成唯一用户名
             user.setPhone(phone);
-
+            user.setAvatar("f9256155491e54bf5e99bf29eece0156_512_512.jpg");
             userMapper.insert(user); // 插入后 user.getId() 自动填充
 
             // 赋予默认角色
@@ -116,12 +116,105 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserMapper, ZUser> implements
         userVO.setRole(zRoleService.selectRole(userVO.getId()));
         userVO.setPerms(zMenuService.getInfoByUserId(userVO.getId()));
 
+
         // 5. 存入 Redis 缓存
         redisCache.setCacheObject(userVO.getId().toString(), userVO);
 
         return userVO;
     }
 
+    @Override
+    public ZUserVO register(ZUserDTO zUserDTO) {
+        // 非空校验：判断 DTO 对象、用户名和密码是否为空
+        if (zUserDTO == null ||
+                StringUtils.isBlank(zUserDTO.getUsername()) ||
+                StringUtils.isBlank(zUserDTO.getPassword())) {
+            throw new RuntimeException("账号密码不能为空");
+        }
+
+        // 检查用户是否已存在
+        ZUser existingUser = userMapper.selectOne(
+                new LambdaQueryWrapper<ZUser>().eq(ZUser::getUsername, zUserDTO.getUsername())
+        );
+        if (existingUser != null) {
+            throw new RuntimeException("用户已存在");
+        }
+
+        // 构建新用户对象
+        ZUser newUser = new ZUser();
+        newUser.setUsername(zUserDTO.getUsername());
+
+        // 对密码进行加密处理
+        String encryptedPassword = passwordEncoder.encode(zUserDTO.getPassword());
+        newUser.setPassword(encryptedPassword);
+
+        // 插入数据库
+        int insertCount = userMapper.insert(newUser);
+        // 赋予默认角色
+        ZUserRole userRole = new ZUserRole();
+        userRole.setUserId(newUser.getId());
+        userRole.setRoleId(Long.valueOf(RoleEnum.USER.getCode())); // 避免硬编码
+        zUserRoleService.addRole(userRole);
+        if (insertCount == 0) {
+            throw new RuntimeException("注册失败");
+        }
+        // 组装返回对象
+        ZUserVO userVO = new ZUserVO();
+        userVO.setUsername(newUser.getUsername());
+        userVO.setAvatar("f9256155491e54bf5e99bf29eece0156_512_512.jpg");
+        return userVO;
+    }
+
+    @Override
+    public ZUserVO login(ZUserDTO zUserDTO) {
+        String username=zUserDTO.getUsername();
+        String password=zUserDTO.getPassword();
+        // 非空校验
+        if (StringUtils.isBlank(zUserDTO.getUsername()) || StringUtils.isBlank(zUserDTO.getPassword())) {
+            throw new RuntimeException("账号或密码不能为空");
+        }
+
+        // 查询用户信息
+        ZUser user = userMapper.selectOne(new LambdaQueryWrapper<ZUser>()
+                .eq(ZUser::getUsername,username));
+
+        if (user == null) {
+            throw new RuntimeException("用户不存在");
+        }
+
+        // 校验密码
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new RuntimeException("密码错误");
+        }
+
+        // 生成 JWT 令牌（如果使用 JWT 进行身份验证）
+        String token = JwtUtil.createJWT(user.getId().toString());
+
+        ZUserVO userVO = ZUserConvert.INSTANCE.convertEntityToVo(user);
+        userVO.setToken(token);
+
+        // 4. 绑定用户角色与权限
+        userVO.setRole(zRoleService.selectRole(userVO.getId()));
+        userVO.setPerms(zMenuService.getInfoByUserId(userVO.getId()));
+
+        // 5. 存入 Redis 缓存
+        redisCache.setCacheObject(userVO.getId().toString(), userVO);
+        return userVO;
+    }
+
+    @Override
+    public ZUserRoleVO getStartAndDeadline(Integer userId) {
+        ZUserRole zUserRole = zUserRoleService.getOne(new LambdaQueryWrapper<ZUserRole>().eq(ZUserRole::getUserId, userId));
+
+        ZUserRoleVO zUserRoleVO = ZUserRoleConvert.INSTANCE.convertEntityToVo(zUserRole);
+
+        LocalDateTime createdTime = zUserRoleVO.getCreatedTime();       // 会员开始时间
+        LocalDateTime deadline = createdTime.plusYears(1);              // 会员截至时间
+
+        zUserRoleVO.setDeadline(deadline);
+
+        return zUserRoleVO;
+    }
 
 
     @Override
@@ -205,7 +298,8 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserMapper, ZUser> implements
                 .eq(user.getGender() != null, ZUser::getGender, user.getGender())
                 .eq(user.getAvatar() != null, ZUser::getAvatar, user.getAvatar())
                 .eq(user.getCreatedBy() != null, ZUser::getCreatedBy, user.getCreatedBy())
-                .ge(user.getCreatedTime() != null, ZUser::getCreatedTime, user.getCreatedTime());
+                .ge(user.getCreatedTime() != null, ZUser::getCreatedTime, user.getCreatedTime())
+                .orderByDesc(ZUser::getCreatedTime);
 
 //        queryWrapper.ge(user.getStartTime() != null, ZUser::getCreatedTime, user.getStartTime())  // 大于等于起始时间
 //                .le(user.getEndTime() != null, ZUser::getCreatedTime, user.getEndTime());  // 小于等于结束时间
@@ -260,6 +354,11 @@ public class ZUserServiceImpl extends ServiceImpl<ZUserMapper, ZUser> implements
 
         return update > 0 && update1;
     }
+
+
+
+
+
 
     /**
      * 批量删除用户
